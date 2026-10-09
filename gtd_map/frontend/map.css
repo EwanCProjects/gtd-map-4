@@ -1,0 +1,143 @@
+/* Overlay styling for the event map. Colours come from the Streamlit theme (set in map.js). */
+:root {
+  --bg: #ffffff;
+  --ink: #31333f;
+  --muted: #6b6d76;
+  --hairline: rgba(49, 51, 63, 0.14);
+  --panel: rgba(255, 255, 255, 0.94);
+  --accent: #c8384b;
+  --font: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.10), 0 6px 18px rgba(0, 0, 0, 0.10);
+  --timeline-h: 46px;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+body:fullscreen { width: 100vw !important; height: 100vh !important; }  /* overrides the frame height */
+#map { position: absolute; inset: 0; }
+#map.picking .maplibregl-canvas { cursor: crosshair; }
+
+.panel {
+  position: absolute;
+  z-index: 2;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+[hidden] { display: none !important; }
+
+button { font: inherit; color: inherit; }
+.icon-btn, .text-btn {
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.icon-btn { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; }
+.icon-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.text-btn { padding: 4px 9px; white-space: nowrap; }
+.icon-btn:hover, .text-btn:hover { border-color: var(--muted); }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Legend: what the dots mean, and how many are drawn */
+#legend { top: 10px; left: 10px; padding: 8px 10px; max-width: 250px; }
+#legend .count { font-weight: 600; font-variant-numeric: tabular-nums; }
+#legend .note { color: var(--muted); }
+#legend .title { color: var(--muted); margin-top: 6px; }
+#legend ul { list-style: none; margin: 4px 0 0; padding: 0; }
+#legend li { display: grid; grid-template-columns: 12px 1fr auto; gap: 7px; align-items: center; padding: 1px 0; }
+#legend .sw { width: 10px; height: 10px; border-radius: 50%; }
+#legend .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+#legend .sizes { display: flex; align-items: flex-end; gap: 12px; margin-top: 6px; }
+#legend .sizes span { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); }
+#legend .sizes i { display: block; border-radius: 50%; border: 1px solid var(--muted); }
+#legend .ramp { height: 8px; border-radius: 4px; margin-top: 5px; }
+#legend .ramp-labels { display: flex; justify-content: space-between; color: var(--muted); }
+#legend .area-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+#legend .area-tools .note { color: var(--muted); flex-basis: 100%; }
+#legend .area-tools .text-btn { font-size: 12px; padding: 3px 8px; }
+
+/* Picking banner */
+#banner { top: 10px; left: 50%; transform: translateX(-50%); padding: 6px 12px; font-weight: 600; }
+
+/* Event card */
+#card {
+  top: 10px; right: 10px; width: 330px; max-width: calc(100% - 290px);
+  max-height: calc(100% - var(--timeline-h) - 34px);
+  overflow-y: auto; padding: 12px 14px 12px;
+}
+#card .head { display: flex; gap: 8px; align-items: flex-start; }
+#card .head > div { flex: 1; min-width: 0; }
+#card h2 { font-size: 15px; line-height: 1.3; margin: 0; }
+#card .date { color: var(--muted); }
+#card .close { flex: none; width: 26px; height: 26px; }
+#card .toll { margin: 8px 0 6px; font-size: 14px; }
+#card .toll strong { font-weight: 600; }
+#card dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; }
+#card dt { color: var(--muted); }
+#card dd { margin: 0; overflow-wrap: anywhere; }
+#card dd .note { color: var(--muted); margin-top: 1px; }
+#card dd.id { font-variant-numeric: tabular-nums; user-select: all; }  /* one click selects the whole ID */
+#card .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+#card .tag { border: 1px solid var(--hairline); border-radius: 999px; padding: 0 8px; color: var(--muted); }
+#card .text { margin: 10px 0 0; overflow-wrap: anywhere; }
+#card .text.pending { color: var(--muted); }
+#card .label { color: var(--muted); margin-top: 8px; }
+#card .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
+
+/* Timeline: events per year, with a time-lapse */
+#timeline {
+  left: 10px; right: 10px; bottom: 8px; height: var(--timeline-h);
+  display: flex; align-items: center; gap: 8px; padding: 0 8px; box-sizing: border-box;
+}
+#timeline .ico-pause { display: none; }
+#timeline.playing .ico-play { display: none; }
+#timeline.playing .ico-pause { display: inline; }
+#tl-label { min-width: 74px; font-variant-numeric: tabular-nums; }
+#tl-label b { font-weight: 600; display: block; line-height: 1.2; }
+#tl-label span { color: var(--muted); font-size: 12px; display: block; line-height: 1.2; }
+#tl-chart { flex: 1; min-width: 0; height: 34px; cursor: pointer; }
+
+/* Keep MapLibre's own controls clear of the timeline */
+.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { bottom: calc(var(--timeline-h) + 8px); }
+.maplibregl-ctrl-group { box-shadow: var(--shadow) !important; }
+.maplibregl-ctrl-attrib { font-size: 11px; }
+.maplibregl-ctrl button.fit-btn { color: #333; }  /* MapLibre's controls stay light in dark mode */
+.fit-btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+/* Hover tooltip */
+#tooltip {
+  position: absolute; z-index: 5; pointer-events: none; max-width: 270px;
+  background: var(--panel); border: 1px solid var(--hairline); border-radius: 6px;
+  box-shadow: var(--shadow); padding: 7px 9px; font-size: 12.5px;
+}
+#tooltip .place { font-weight: 600; }
+#tooltip .muted { color: var(--muted); }
+#tooltip .toll { font-weight: 600; margin-top: 3px; }
+#tooltip .stack { margin-top: 3px; font-size: 12px; }
+
+/* Loading and error messages */
+#status {
+  position: absolute; z-index: 6; left: 50%; top: 45%; transform: translate(-50%, -50%);
+  background: var(--panel); border: 1px solid var(--hairline); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 12px 16px; max-width: 420px; text-align: center;
+}
+#status.error { border-color: var(--accent); }
+
+@media (max-width: 640px) {
+  #card { left: 10px; right: 10px; width: auto; max-width: none; top: auto; bottom: calc(var(--timeline-h) + 16px); max-height: 55%; }
+  #legend { max-width: 180px; }
+}
