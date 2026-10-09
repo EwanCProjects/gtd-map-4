@@ -368,7 +368,7 @@ def group_label(name: str) -> str:
 with st.sidebar:
     st.header("Filters")
     st.text_input(
-        "Search", key="text", placeholder="e.g. embassy, Bhutto",
+        "Search", key="text", placeholder="e.g. embassy, president",
         help="Finds events whose summary, place, target or perpetrator group mentions the text. "
              "Separate alternatives with commas.",
     )
