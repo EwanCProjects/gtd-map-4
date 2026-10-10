@@ -1,0 +1,64 @@
+# Keeps the Streamlit Community Cloud app awake.
+#
+# Community Cloud puts an app to sleep after 12 hours without visitors. Every 4 hours, this opens
+# the app in a headless browser, like a visitor would: if the app is asleep, it presses
+# "Yes, get this app back up!", then waits until the map has loaded. If the app doesn't come up,
+# the run fails and GitHub e-mails you, so it doubles as an uptime check.
+#
+# It only works while the app is public: a private app shows a sign-in page to the robot.
+# Run it by hand from the Actions tab: "Keep the app awake" → "Run workflow".
+
+name: Keep the app awake
+
+on:
+  schedule:
+    - cron: "23 */4 * * *"   # every 4 hours (UTC), off the hour when GitHub is busiest
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_URL: https://terrorismmap.streamlit.app/
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install a headless browser
+        run: |
+          pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+
+      - name: Visit the app (and wake it up if it's asleep)
+        run: |
+          python - <<'PY'
+          import os, re
+          from playwright.sync_api import sync_playwright, TimeoutError as Timeout
+
+          url = os.environ["APP_URL"]
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page(viewport={"width": 1400, "height": 900})
+              page.goto(url, wait_until="domcontentloaded", timeout=120_000)
+
+              wake = page.get_by_role("button", name=re.compile("get this app back up", re.I))
+              try:
+                  wake.wait_for(state="visible", timeout=20_000)
+                  print("The app was asleep: waking it up")
+                  wake.click()
+              except Timeout:
+                  print("The app was awake")
+
+              # Community Cloud shows the app in an iframe; the map is a component iframe inside it.
+              # Waking up can take a few minutes.
+              app = page.frame_locator('iframe[title="streamlitApp"]')
+              app.locator('iframe[title="gtd_map.event_map"]').wait_for(state="attached", timeout=600_000)
+              print("The app is up")
+              page.wait_for_timeout(20_000)  # stay a moment, like a visitor
+              browser.close()
+          PY
