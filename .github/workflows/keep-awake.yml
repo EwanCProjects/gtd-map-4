@@ -20,12 +20,14 @@ permissions:
 
 jobs:
   visit:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.56 can't install its browser on Ubuntu 26.04, which ubuntu-latest
+    # switches to from October 2026.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       APP_URL: https://terrorismmap.streamlit.app/
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
